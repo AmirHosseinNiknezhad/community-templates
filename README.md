@@ -22,7 +22,7 @@ fuzzel/
   template.toml           # the manifest: catalog entry, and what gets rendered where
   fuzzel.conf             # the input file, written in Noctalia's template syntax
   apply.sh                # optional hook, run after rendering
-  README.md               # optional, for app-specific setup notes
+  README.md               # required, for app-specific setup notes
 ```
 
 ## The manifest
@@ -118,9 +118,12 @@ folder, so the manifest you submit uses `{{ config_dir }}/apply.sh`.
 ## Submitting
 
 Open a PR against `main`. CI validates every manifest on each push: the catalog id matches the directory, the category is
-known, every `input_path` exists, every entry writes somewhere, and hooks only reference files you ship.
+known, every `input_path` exists, every entry writes somewhere, hooks only reference files you ship, and every template
+has a non-empty `README.md` (exact filename).
 
 - **One app per PR.**
+- Include a `README.md` explaining what is themed, prerequisites, setup, generated config paths, and how changes take
+  effect. Document hook side effects and overwrite caveats where applicable; say explicitly when no manual setup is needed.
 - Include a screenshot of the app with the theme applied.
 - Say which version of the app you tested against.
 - Do not commit rendered output or your own personal app config.

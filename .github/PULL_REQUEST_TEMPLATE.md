@@ -39,4 +39,5 @@
 - [ ] The directory name matches the `[catalog.<id>]` id in `template.toml`.
 - [ ] `category` is one of: `ai`, `audio`, `browser`, `chat`, `compositor`, `editor`, `gaming`, `launcher`, `system`, `terminal`, `misc`.
 - [ ] Every `input_path` names a file that exists in this directory.
+- [ ] A non-empty `README.md` documents what is themed, prerequisites, setup, output paths, and any hook side effects.
 - [ ] No generated output or app-specific personal config is committed.

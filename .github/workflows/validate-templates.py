@@ -234,6 +234,12 @@ class Validator:
             self.validate_entry(manifest_path, name, entry)
 
     def validate_files(self, manifest_path: Path) -> None:
+        readme = manifest_path.parent / "README.md"
+        if not readme.is_file():
+            self.add_error(readme, "required README.md is missing")
+        elif not readme.read_text(encoding="utf-8").strip():
+            self.add_error(readme, "README.md must not be empty")
+
         for path in manifest_path.parent.rglob("*"):
             if path.is_symlink():
                 rel = path.relative_to(self.root).as_posix()
