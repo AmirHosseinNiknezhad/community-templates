@@ -7,6 +7,8 @@ Applies Noctalia colors to Zen's browser interface and internal pages through `u
 1. Install and launch Zen at least once to create a profile.
 2. Back up each profile's `chrome/userChrome.css`, `chrome/userContent.css` and `user.js` if they exist.
 3. Enable **Zen Browser** in **Noctalia Settings -> Templates**.
+4. In Zen, open **Settings → Appearance** and set **Website Appearance** to **Auto**, so internal pages follow the Noctalia dark/light mode.
+5. Restart Zen. It does not live-reload, so a restart may also be needed after color changes.
 
 The hook only discovers profiles with a `prefs.js` file exactly one profile-directory level below either `$XDG_CONFIG_HOME/zen` (normally `~/.config/zen`) or `~/.zen`. It does nothing when those roots are absent. Other layouts, including sandbox-specific profile locations, are not searched; they need manual imports and preference setup or an adapted hook.
 
@@ -30,3 +32,24 @@ Existing lines referencing the corresponding generated stylesheet are removed be
 Both template entries run this hook synchronously to prevent concurrent profile edits. It requires Bash and standard utilities including `find`, `sed`, `mktemp` and `cmp`. It does not restart Zen or send a live-reload command.
 
 The shipped content stylesheet marks its `about:logins` and `about:protections` sections as no longer working; coverage of those pages is not guaranteed.
+
+## Troubleshooting
+
+- **Some colors look wrong:** Zen mods can override the template colors. Disable all mods under **Settings → Zen Mods** and restart Zen to check. For example, [Better Tab Indicators](https://zen-browser.app/mods/664c54f9-d97d-410b-a479-23dd8a08a628/) can make the selected-tab highlight barely visible; disable it or set a custom color in its settings (see [#51](https://github.com/noctalia-dev/community-templates/issues/51)).
+- **Text is unreadable in dark or light mode:** make the system GTK color scheme (`prefer-dark` or `prefer-light`) match the Noctalia mode, for example by also enabling Noctalia's built-in GTK template.
+
+## Removing the theme
+
+Disabling the template does not undo the profile changes. For each profile, remove these lines from `chrome/userChrome.css` and `chrome/userContent.css` respectively, with your own cache path:
+
+```css
+@import "/home/you/.cache/noctalia/zen-browser/zen-userChrome.css";
+@import "/home/you/.cache/noctalia/zen-browser/zen-userContent.css";
+```
+
+Remove these preferences from `user.js` if nothing else needs them, then restart Zen:
+
+```js
+user_pref("devtools.chrome.enabled", true);
+user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+```

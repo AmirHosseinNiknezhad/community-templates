@@ -30,6 +30,13 @@ output_path = "/mnt/data/MyVault/.obsidian/snippets/noctalia.css"
 - Obsidian (any recent version with CSS snippet support)
 - `python3` (for enabling the snippet in `appearance.json`)
 
+## Setup
+
+1. Enable **Obsidian** in **Noctalia Settings -> Templates**.
+2. In Obsidian, open **Settings → Appearance** and set **Base color scheme** to **Adapt to system**, so the
+   dark or light variant follows Noctalia's mode.
+3. Check that the `noctalia` snippet is on under **Settings → Appearance → CSS Snippets**.
+
 ## Notes
 
 - The snippet layers on top of any installed Obsidian theme — it overrides color
