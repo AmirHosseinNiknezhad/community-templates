@@ -38,6 +38,7 @@ ENTRY_FIELDS = {
     "output_path_dynamic",
     "pre_hook",
     "post_hook",
+    "undo_hook",
     "hook_async",
     "post_action",
     "requires_path",
@@ -219,7 +220,7 @@ class Validator:
                     if len(values) != 1:
                         self.add_error(manifest_path, f"{context}: post_action requires exactly one output_path")
 
-        for field in ("pre_hook", "post_hook", "input_path_dynamic", "output_path_dynamic"):
+        for field in ("pre_hook", "post_hook", "undo_hook", "input_path_dynamic", "output_path_dynamic"):
             command = entry.get(field)
             if is_non_empty_string(command):
                 self.validate_config_dir_refs(manifest_path, context, field, command)

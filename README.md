@@ -53,6 +53,7 @@ Beyond the basics:
 | `input_path_modes` | `{ dark = "...", light = "..." }` when dark and light need different source files. |
 | `input_path_dynamic` | A command whose stdout is the input path. |
 | `pre_hook` / `post_hook` | Shell run before or after the write. |
+| `undo_hook` | Shell run when the user disables the template (or all community templates), to remove what `post_hook` added to the app's config. Retried on the next theme change until it exits 0. |
 | `post_action` | Named noctalia built-in after the write (not shell). Currently: `firefox-theme`. |
 | `requires_path` | Skip the entry unless this path exists, so one template can ship entries for apps a user may not have. |
 
@@ -80,8 +81,8 @@ color token, filters (`| darken(0.2)`, `| hex_stripped`), loops and conditionals
 
 ## Hooks run as the user
 
-A `pre_hook` or `post_hook` is shell that runs on the user's machine, as them, every time the theme changes. Rendering a
-file is inert; a hook is not. So:
+A `pre_hook`, `post_hook`, or `undo_hook` is shell that runs on the user's machine, as them; pre and post hooks run every
+time the theme changes. Rendering a file is inert; a hook is not. So:
 
 - Keep `apply.sh` short and readable. A reviewer has to be able to see everything it does.
 - Make it **idempotent**. It runs on every theme change, so it must never append the same line twice. See
@@ -90,6 +91,8 @@ file is inert; a hook is not. So:
   never asked for.
 - Download nothing, and execute nothing you did not ship in this directory.
 - Touch only that app's own config.
+- If `post_hook` edits the app's config (an include, a theme selection), ship an `undo_hook` that reverts exactly that
+  edit and is a no-op when there is nothing to revert. A failed undo is retried, so it must be idempotent too.
 
 ## Test it before you PR
 
