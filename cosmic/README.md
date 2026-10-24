@@ -49,6 +49,15 @@ owned by this template, so undoing discards any theme customized in
 
 ## Notes
 
+- Containers follow the neutral surface ramp rather than Material's tinted
+  `*_container` roles: the window is `surface`, the nav sidebar is
+  `surface_container` (the role Noctalia's GTK template uses for
+  `sidebar_bg_color`), and nested panels are `surface_container_high`. Mapping
+  them to `primary_container` painted sidebars a saturated accent color.
+- Icon, list, text and link buttons are flat: a transparent base with a
+  translucent hover/pressed overlay, which is also what libcosmic's own defaults
+  do. A solid `icon_button.base` turns the titlebar window controls into filled
+  circles, because libcosmic paints them at `radius_xl`.
 - COSMIC has no dedicated warning color, so Noctalia's `tertiary` is used for it.
 - Frosted surfaces are left disabled, matching COSMIC's default appearance.
 - The `Builder` config is written so installing `cosmic-settings` later shows

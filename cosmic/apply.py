@@ -176,6 +176,55 @@ def component(
     )
 
 
+def overlay_color(dark: bool, *alphas: float) -> str:
+    """Serialize a neutral state overlay at the given opacity.
+
+    Successive alphas composite over the previous colour (alpha-over), which is
+    how iced draws a hover/pressed overlay on top of an existing background.
+    """
+    value = 0.0
+    for alpha in alphas:
+        value = alpha + value * (1.0 - alpha)
+    return color("FFFFFF" if dark else "000000", clamp(value * 255))
+
+
+def overlay_component(
+    on: str,
+    accent: str,
+    dark: bool,
+    *,
+    base: float = 0.0,
+    hover: float = 0.10,
+    pressed: float = 0.20,
+) -> str:
+    """Build a Component that lets whatever is behind it show through.
+
+    libcosmic paints ``Button::Icon``/``Button::HeaderBar`` as
+    ``icon_button.base`` inside a ``radius_xl`` box, so an opaque base turns
+    every titlebar control into a filled circle. Upstream COSMIC therefore keeps
+    these bases transparent and lets the composited state overlays carry hover
+    and press, which is also how Adwaita/Nautilus keep headerbar buttons flat.
+    """
+    return (
+        "( base: %s, hover: %s, pressed: %s, selected: %s, selected_text: %s, "
+        "focus: %s, divider: %s, on: %s, disabled: %s, on_disabled: %s, "
+        "border: %s, disabled_border: %s )"
+    ) % (
+        overlay_color(dark, base),
+        overlay_color(dark, hover, base),
+        overlay_color(dark, pressed, base),
+        overlay_color(dark, hover, base),
+        color(accent),
+        color(accent),
+        overlay_color(dark, 0.20, base),
+        color(on),
+        overlay_color(dark, base),
+        color(on, 153),
+        overlay_color(dark, base),
+        overlay_color(dark, base),
+    )
+
+
 def container(
     base: str,
     on: str,
@@ -321,7 +370,6 @@ def build_theme(
     on = colors["on_surface"]
     accent = colors["primary"]
     on_accent = colors["on_primary"]
-    outline = colors["outline"]
     outline_variant = colors["outline_variant"]
     tertiary = colors["tertiary"]
     on_tertiary = colors["on_tertiary"]
@@ -329,21 +377,27 @@ def build_theme(
     on_error = colors["on_error"]
 
     background = container(base, on, accent, outline_variant, dark, bump=0.03)
+    # libcosmic paints the nav bar/sidebar with `primary.base` and nested panels
+    # with `secondary.base`. Material's `*_container` roles are tinted accents and
+    # read as bright slabs there, so map the containers onto the neutral surface
+    # ramp instead: window = surface, sidebar = surface_container, panels =
+    # surface_container_high. That is also what Noctalia's GTK template uses for
+    # `sidebar_bg_color`.
     primary = container(
-        colors["primary_container"],
-        colors["on_primary_container"],
+        colors["surface_container"],
+        on,
         accent,
         outline_variant,
         dark,
-        bump=0.06,
+        bump=0.05,
     )
     secondary = container(
-        colors["secondary_container"],
-        colors["on_secondary_container"],
+        colors["surface_container_high"],
+        on,
         accent,
         outline_variant,
         dark,
-        bump=0.06,
+        bump=0.05,
     )
 
     theme = {
@@ -356,12 +410,10 @@ def build_theme(
         "transparent_background": background,
         "transparent_primary": primary,
         "transparent_secondary": secondary,
-        "button": component(
-            colors["secondary_container"],
-            colors["on_secondary_container"],
-            accent,
-            outline,
-            dark,
+        # Standard buttons are a translucent neutral wash, so they pick up the
+        # container they sit in (window, sidebar, panel) like Adwaita buttons do.
+        "button": overlay_component(
+            on, accent, dark, base=0.10, hover=0.14, pressed=0.20
         ),
         "accent": component(accent, on_accent, accent, accent, dark, divider=0.40),
         "success": component(
@@ -387,22 +439,12 @@ def build_theme(
         "warning_button": component(
             tertiary, on_tertiary, accent, tertiary, dark, divider=0.40
         ),
-        "icon_button": component(
-            colors["secondary_container"],
-            colors["on_secondary_container"],
-            accent,
-            outline,
-            dark,
-        ),
-        "link_button": component(accent, on_accent, accent, accent, dark),
-        "list_button": component(
-            colors["secondary_container"],
-            colors["on_secondary_container"],
-            accent,
-            outline,
-            dark,
-        ),
-        "text_button": component(base, on, accent, base, dark),
+        # Flat controls: no base fill, only a hover/pressed overlay. This is what
+        # keeps the titlebar window controls from drawing a filled circle.
+        "icon_button": overlay_component(on, accent, dark),
+        "link_button": overlay_component(accent, accent, dark),
+        "list_button": overlay_component(on, accent, dark),
+        "text_button": overlay_component(on, accent, dark),
         "palette": palette_inner(mode, colors, neutral),
         "spacing": SPACING,
         "corner_radii": CORNER_RADII,
