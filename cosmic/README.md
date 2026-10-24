@@ -67,22 +67,22 @@ What this does not reach:
 
 ## Tested against
 
-- COSMIC epoch 1.10.0 (`cosmic-files` 1.0.0, `cosmic-edit` 1.0.0) on Arch Linux.
+- COSMIC 1.10.0 (`cosmic-files` 1.10.0, `cosmic-edit` 1.10.0 git build) on Arch
+  Linux.
 
 ## Reverting
 
-Run the shipped `undo.sh` to remove the generated theme and let libcosmic fall
-back to COSMIC's built-in theme:
+Disabling the template in **Settings → Templates** runs the shipped `undo.sh`,
+which removes the generated theme and lets libcosmic fall back to COSMIC's
+built-in theme. To run it by hand:
 
 ```sh
 bash "${XDG_STATE_HOME:-$HOME/.local/state}/noctalia/community-templates/cosmic/undo.sh"
 ```
 
-Noctalia currently runs `undo_hook` only for built-in templates, so community
-manifests cannot reference the script; it is shipped for manual use until
-community templates gain undo support. The derived theme directory is fully
-owned by this template, so undoing discards any theme customized in
-`cosmic-settings` before the template was enabled.
+The derived theme directory is fully owned by this template, so undoing discards
+any theme customized in `cosmic-settings` before the template was enabled; that
+earlier theme is not restored.
 
 ## Notes
 
