@@ -4,6 +4,20 @@ Keeps [COSMIC](https://system76.com/cosmic) applications built on libcosmic in
 sync with the Noctalia palette: `cosmic-files`, `cosmic-edit`, `cosmic-term` and
 friends.
 
+## Screenshots
+
+`cosmic-files` with the built-in Noctalia palette:
+
+| Dark | Light |
+| --- | --- |
+| ![cosmic-files, Noctalia dark](screenshot.png) | ![cosmic-files, Noctalia light](light-screenshot.png) |
+
+The same theme driven by two other built-in palettes:
+
+| Catppuccin | Tokyo Night |
+| --- | --- |
+| ![cosmic-files, Catppuccin](screenshot-catppuccin.png) | ![cosmic-files, Tokyo Night](screenshot-tokyo-night.png) |
+
 ## What it writes
 
 COSMIC stores its theme in `~/.config/cosmic`:
