@@ -22,6 +22,29 @@ after building a theme, so this is equivalent to selecting a custom theme in
 Settings. Both modes are written on every apply, which means flipping Noctalia
 between dark and light updates COSMIC immediately.
 
+## Scope
+
+Theming happens at the toolkit level, not per app. The files above are read by
+`cosmic-config` and turned into a `cosmic_theme::Theme`, which `libcosmic` then
+uses to draw every widget. So any application built on libcosmic follows
+automatically: `cosmic-files`, `cosmic-edit`, `cosmic-term`, `cosmic-player`,
+`cosmic-store`, the panel and its applets.
+
+`cosmic-comp` reads the same theme for the parts the compositor draws itself:
+`window_hint` and `accent_color` for the focused-window hint, `frosted` /
+`frosted_windows` / `active_hint` for blur and hint strength.
+
+What this does not reach:
+
+- Apps that are not built on libcosmic (GTK, Qt, browsers). They need their own
+  template; `com.system76.CosmicTk/v1/apply_theme_global` is set to `false` so
+  COSMIC does not override the GTK/Qt theming Noctalia owns.
+- Sandboxed (Flatpak) libcosmic apps, which keep their own
+  `~/.var/app/<id>/config` and only see this if granted access to the host
+  config directory.
+- Changes are live only where `cosmic-settings-daemon` is running to deliver
+  config watcher notifications; otherwise apps pick the theme up on next launch.
+
 ## Requirements
 
 - A COSMIC application launched at least once, so `~/.config/cosmic` exists.
