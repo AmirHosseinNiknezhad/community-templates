@@ -97,6 +97,25 @@ family_output() {
     done < <(family_installed_ids)
 }
 
+family_refresh() {
+    local identifier directory launchers_string launcher
+    local -a launchers
+    while read -r identifier directory launchers_string; do
+        family_policy_ready "$directory/$family_policy_name" || continue
+        read -r -a launchers <<< "$launchers_string"
+        # Channels can share a policy directory but run separate instances.
+        for launcher in "${launchers[@]}"; do
+            command -v "$launcher" >/dev/null 2>&1 || continue
+            # Some builds remain alive without an existing browser instance.
+            # Bound the refresh request so it cannot leave a background browser.
+            if ! timeout --kill-after=1s 5s "$launcher" \
+                --refresh-platform-policy --no-startup-window >/dev/null 2>&1; then
+                printf 'Warning: could not refresh %s policies; use Reload policies or restart the browser.\n' "$launcher" >&2
+            fi
+        done
+    done < <(family_registry)
+}
+
 family_remove() {
     local method=${1:-gui} identifier directory launchers file state
     local -a pending=()
@@ -131,9 +150,10 @@ family_main() {
             ;;
         setup) family_setup terminal ;;
         output) family_output ;;
+        refresh) family_refresh ;;
         undo) family_remove gui ;;
         remove) family_remove terminal ;;
-        *) printf 'Usage: bash %s {list|setup|output|undo|remove}\n' "$0" >&2; return 1 ;;
+        *) printf 'Usage: bash %s {list|setup|output|refresh|undo|remove}\n' "$0" >&2; return 1 ;;
     esac
 }
 

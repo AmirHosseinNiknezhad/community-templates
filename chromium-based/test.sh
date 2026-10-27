@@ -16,6 +16,21 @@ fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 installed=''
 pkexec_available=1
 auth_result=0
+refresh_log="$scratch/refresh.log"
+refresh_failure=''
+: > "$refresh_log"
+
+# Refresh is mocked too: validate the bounded, windowless invocation without
+# launching a real browser, including launchers that fail or lack flag support.
+# shellcheck disable=SC2329
+timeout() {
+    [[ $1 == --kill-after=1s && $2 == 5s ]] || fail 'refresh must have a bounded runtime'
+    shift 2
+    [[ $# == 3 && $2 == --refresh-platform-policy && $3 == --no-startup-window ]] \
+        || fail 'refresh must request policy reload without a new window'
+    printf '%s\n' "$1" >> "$refresh_log"
+    [[ $1 != "$refresh_failure" ]]
+}
 
 # Mock discovery and authentication; no real browser, sudo, or polkit is used.
 # Called by the sourced scripts.
@@ -125,6 +140,28 @@ outputs=$(family_output 2> /dev/null)
 [[ $outputs == "$policy"$'\n'"$scratch/brave/$family_policy_name" ]] || fail 'installing another browser should prepare only its new path'
 [[ $(<"$auth_log") == 'gui setup brave' ]] || fail 'additional browsers should use one GUI authorization'
 printf '{"HomepageLocation":"https://example.com"}\n' > "$scratch/chromium/other.json"
+
+# Shared policy paths must still refresh every installed browser/channel.
+installed='fake-chromium fake-helium fake-brave'
+auth_before=$(<"$auth_log")
+refresh_failure='fake-chromium'
+family_refresh 2> "$scratch/refresh-warnings"
+[[ $(<"$refresh_log") == $'fake-chromium\nfake-helium\nfake-brave' ]] || fail 'a failed refresh must not prevent other launchers from refreshing'
+grep -q 'Reload policies' "$scratch/refresh-warnings" || fail 'failed refresh should explain the fallback'
+[[ $(<"$auth_log") == "$auth_before" ]] || fail 'refresh must not request authentication'
+[[ $(<"$policy") == '{ "BrowserThemeColor": "#0b1824" }' ]] || fail 'refresh must preserve the rendered policy'
+
+refresh_failure=''
+: > "$refresh_log"
+mv "$scratch/brave/$family_policy_name" "$scratch/held-policy"
+installed='fake-helium fake-brave'
+family_refresh
+[[ $(<"$refresh_log") == 'fake-helium' ]] || fail 'refresh must skip absent launchers and unprepared policy paths'
+mv "$scratch/held-policy" "$scratch/brave/$family_policy_name"
+: > "$refresh_log"
+installed=''
+family_refresh
+[[ ! -s $refresh_log ]] || fail 'refresh without installed browsers must be a no-op'
 
 # Removal cancellation leaves every policy unchanged and signals Noctalia to retry.
 auth_result=126

@@ -64,9 +64,18 @@ administrator-managed configuration on shared or centrally managed machines.
 
 ## Apply and remove
 
-Chromium watches the regular policy files and should apply changes after a
-short delay. If needed, restart the browser or open its `chrome://policy`,
-`brave://policy`, or `helium://policy` page and select **Reload policies**.
+After writing the color, the post hook runs each detected browser launcher with
+`--refresh-platform-policy --no-startup-window` to refresh running browsers
+immediately. This needs a build supporting the refresh flag (upstream Chromium
+142 or later; some derivatives backported it). Each request uses `timeout` from
+GNU coreutils to limit its runtime to five seconds, with forced termination one
+second later if needed; some builds otherwise stay alive when the browser is
+closed. Refresh requests run as your desktop user without authentication.
+
+Older or unsupported builds still watch the policy files and should apply
+changes after a short delay. If needed, restart the browser or open its
+`chrome://policy`, `brave://policy`, or `helium://policy` page and select
+**Reload policies**. This fallback also applies after removing the policy.
 
 Disabling the template runs its undo hook and requests graphical authentication
 to remove this template's policy files, including those belonging to browsers
@@ -132,4 +141,5 @@ References: [Chromium Linux setup](https://www.chromium.org/administrators/linux
 [Chrome for Testing policy paths](https://chromium.googlesource.com/chromium/src/+/main/docs/enterprise/policies.md),
 [Brave policies](https://support.brave.app/hc/en-us/articles/360039248271-Group-Policy),
 [BrowserThemeColor](https://raw.githubusercontent.com/chromium/chromium/main/components/policy/resources/templates/policy_definitions/Miscellaneous/BrowserThemeColor.yaml),
+[policy refresh flag](https://github.com/chromium/chromium/blob/main/chrome/common/chrome_switches.h),
 and [pkexec authentication behavior](https://www.freedesktop.org/software/polkit/docs/latest/pkexec.1.html).
