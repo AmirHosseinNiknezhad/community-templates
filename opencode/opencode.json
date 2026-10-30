@@ -76,8 +76,8 @@
         "context": "{{ colors.background.default.hex }}"
       },
       "highlight": {
-        "added": "{{ colors.terminal_bright_green.default.hex }}",
-        "removed": "{{ colors.terminal_bright_red.default.hex }}"
+        "added": "{{ colors.terminal_bright_green.default.hex | lighten 8 }}",
+        "removed": "{{ colors.terminal_bright_red.default.hex | lighten 8 }}"
       },
       "lineNumber": {
         "text": "{{ colors.on_surface_variant.default.hex }}",
